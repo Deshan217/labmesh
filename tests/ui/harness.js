@@ -91,7 +91,7 @@ const mockActions = {
     if (activeState.transfer) {
       activeState.transfer.fileName = file.name;
       activeState.transfer.fileSize = file.size;
-      activeState.transfer.chunkCount = Math.max(2, Math.ceil(file.size / (64 * 1024)));
+      activeState.transfer.chunkCount = Math.max(2, Math.ceil(file.size / (8 * 1024)));
       activeState.transfer.mode = options.mode;
       activeState.transfer.phase = 'seeding';
       activeState.transfer.detail = `Seeding ${file.name} to connected peers in ${options.mode} mode.`;

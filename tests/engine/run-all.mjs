@@ -8,6 +8,7 @@ import { testProtocol } from "./protocol.test.mjs";
 import { testTwoPeer } from "./two-peer.test.mjs";
 import { testThreePeerDemo } from "./three-peer-demo.test.mjs";
 import { testIntegrityFailure } from "./integrity-failure.test.mjs";
+import { testUiEngineIntegration } from "./ui-engine-integration.test.mjs";
 
 async function runAll() {
   console.log("==========================================");
@@ -22,6 +23,7 @@ async function runAll() {
     await testTwoPeer();
     await testThreePeerDemo();
     await testIntegrityFailure();
+    await testUiEngineIntegration();
 
     const duration = ((Date.now() - start) / 1000).toFixed(2);
     console.log("\n==========================================");
