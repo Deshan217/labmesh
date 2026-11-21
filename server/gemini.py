@@ -57,17 +57,37 @@ async def explain(snapshot: Snapshot):
               "Only recommend disconnecting the source if ready_to_disconnect is true. "
               "Only describe a local file as verified if verified is true. "
               "An empty session is waiting for a file. Do not invent rates, errors or ETA. Snapshot: " + facts)
-    async with httpx.AsyncClient(timeout=18) as client:
-        response = await client.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            headers={"x-goog-api-key": key},
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-        )
-    if response.status_code != 200:
-        raise ValueError(f"Gemini returned HTTP {response.status_code}. Check model, key and quota on the coordinator.")
-    candidates = response.json().get("candidates") or []
-    parts = candidates[0].get("content", {}).get("parts", []) if candidates else []
-    answer = " ".join(p["text"] for p in parts if p.get("text") and not p.get("thought")).strip()
-    if not answer:
-        raise ValueError("Gemini returned no explanation. Try again.")
-    return {"answer": answer[:2400], "model": model}
+    
+    import asyncio
+    models_to_try = [model]
+    if model != "gemini-flash-latest" and not model.startswith("test-"):
+        models_to_try.append("gemini-flash-latest")
+
+    last_error = ""
+    for attempt_model in models_to_try:
+        for _ in range(2):
+            try:
+                async with httpx.AsyncClient(timeout=18) as client:
+                    response = await client.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{attempt_model}:generateContent",
+                        headers={"x-goog-api-key": key},
+                        json={"contents": [{"parts": [{"text": prompt}]}]},
+                    )
+                if response.status_code == 200:
+                    candidates = response.json().get("candidates") or []
+                    parts = candidates[0].get("content", {}).get("parts", []) if candidates else []
+                    answer = " ".join(p["text"] for p in parts if p.get("text") and not p.get("thought")).strip()
+                    if answer:
+                        return {"answer": answer[:2400], "model": attempt_model}
+                elif response.status_code in (503, 429, 500):
+                    last_error = f"Gemini returned HTTP {response.status_code}. (Server overloaded, retrying...)"
+                    await asyncio.sleep(0.8)
+                    continue
+                else:
+                    last_error = f"Gemini returned HTTP {response.status_code}. Check model, key and quota on the coordinator."
+                    break
+            except (httpx.TimeoutException, httpx.NetworkError):
+                await asyncio.sleep(0.8)
+                continue
+
+    raise ValueError(last_error or "Gemini returned no explanation. Try again.")
