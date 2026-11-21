@@ -5,6 +5,8 @@
 __pycache__/
 *.pyc
 demo/workshop.bin
+*.crx
+*.pem
 node_modules/
 *.rar
 *.zip
