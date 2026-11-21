@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LabMesh UI Dev Harness & Snapshot Inspector</title>
+  <link rel="stylesheet" href="../../extension/styles.css">
+  <style>
+    /* Harness Toolbar & Debugging UI Styles */
+    body {
+      margin: 0;
+      background: #060913;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    #harness-bar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #0f172a;
+      border-bottom: 2px solid #334155;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .harness-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .harness-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.05em;
+    }
+
+    .harness-select {
+      padding: 0.45rem 0.85rem;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .harness-btn {
+      padding: 0.45rem 0.75rem;
+      background: #334155;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .harness-btn:hover {
+      background: #475569;
+      border-color: #64748b;
+    }
+
+    .harness-btn.active {
+      background: #2563eb;
+      border-color: #60a5fa;
+      color: #ffffff;
+    }
+
+    .harness-btn--toggle {
+      background: #1e293b;
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+
+    .harness-btn--toggle:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    #snapshot-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      padding: 0.35rem 1.25rem;
+      background: #111a2e;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    /* Viewport Simulation Wrappers */
+    #viewport-container {
+      margin: 0 auto;
+      transition: width 0.3s ease, max-width 0.3s ease;
+      background: #0b1120;
+      min-height: calc(100vh - 240px);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .viewport--compact {
+      max-width: 440px !important;
+      border-left: 2px dashed #334155;
+      border-right: 2px dashed #334155;
+    }
+
+    .viewport--laptop {
+      max-width: 980px !important;
+      border-left: 2px dashed #334155;
+      border-right: 2px dashed #334155;
+    }
+
+    .viewport--projector {
+      max-width: 1400px !important;
+    }
+
+    /* Action Logs Drawer */
+    #harness-logs-drawer {
+      background: #080d1a;
+      border-top: 2px solid #334155;
+      padding: 1rem 1.25rem;
+    }
+
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .logs-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .logs-table-wrap {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+    }
+
+    .logs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--lm-font-mono);
+      font-size: 0.82rem;
+    }
+
+    .logs-table th {
+      background: #0f172a;
+      text-align: left;
+      padding: 0.4rem 0.6rem;
+      color: #64748b;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .logs-table td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid #0f172a;
+    }
+
+    .log-time {
+      color: #64748b;
+      width: 110px;
+    }
+
+    .log-action {
+      color: #38bdf8;
+      font-weight: 700;
+      width: 120px;
+    }
+
+    .log-payload {
+      color: #a7f3d0;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Developer Toolbar -->
+  <header id="harness-bar">
+    <div class="harness-group">
+      <span class="harness-title">🧪 LABMESH HARNESS</span>
+      <select id="snapshot-select" class="harness-select" aria-label="Select state snapshot"></select>
+    </div>
+
+    <!-- Viewport Width Switchers -->
+    <div class="harness-group">
+      <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">VIEWPORT:</span>
+      <button type="button" class="harness-btn" data-viewport="compact" title="Extension Popup Width (440px)">📱 Compact</button>
+      <button type="button" class="harness-btn" data-viewport="laptop" title="Standard Laptop (980px)">💻 Laptop</button>
+      <button type="button" class="harness-btn active" data-viewport="projector" title="Classroom Projector (1400px)">📽️ Projector</button>
+    </div>
+
+    <!-- Live Mutators -->
+    <div class="harness-group">
+      <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">MUTATE:</span>
+      <button type="button" class="harness-btn harness-btn--toggle" id="toggle-ready">⚡ Toggle Ready</button>
+      <button type="button" class="harness-btn harness-btn--toggle" id="toggle-host-online">🔌 Toggle Host Net</button>
+      <button type="button" class="harness-btn harness-btn--toggle" id="toggle-verified">✓ Toggle Verified</button>
+      <button type="button" class="harness-btn harness-btn--toggle" id="toggle-pause">⏸ Pause/Resume</button>
+    </div>
+  </header>
+
+  <!-- Snapshot Description -->
+  <div id="snapshot-desc">Loading snapshot...</div>
+
+  <!-- Simulated Viewport Wrapper -->
+  <main id="viewport-container" class="viewport-wrapper viewport--projector">
+    <!-- UI Mount Target -->
+    <div id="app-root"></div>
+  </main>
+
+  <!-- Action Event Log Drawer -->
+  <section id="harness-logs-drawer" aria-label="Action Logs">
+    <div class="logs-header">
+      <span class="logs-title">Dispatched Action Callbacks (app.js Interface)</span>
+      <button type="button" class="harness-btn" id="clear-logs">Clear Logs</button>
+    </div>
+    <div class="logs-table-wrap">
+      <table class="logs-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Callback</th>
+            <th>Payload Passed to app.js</th>
+          </tr>
+        </thead>
+        <tbody id="action-logs-body">
+          <tr>
+            <td colspan="3" style="text-align: center; color: #475569; padding: 1rem;">No actions triggered yet. Interact with the UI above.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Harness Script -->
+  <script type="module" src="./harness.js"></script>
+</body>
+</html>
