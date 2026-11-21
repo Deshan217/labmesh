@@ -1,3 +1,10 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+demo/workshop.bin
 node_modules/
 *.rar
 *.zip
