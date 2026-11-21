@@ -72,11 +72,10 @@ body {
 .labmesh-app {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.25rem;
+  padding: 0.5rem 0 1.25rem 0;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  min-height: 100vh;
 }
 
 /* ==========================================================================
@@ -1097,3 +1096,164 @@ body {
     min-width: 4px;
   }
 }
+
+/* ==========================================================================
+   EXTENSION SHELL & GEMINI ROOM GUIDE (Advisor Section Contrast Fix)
+   Ensures text is 100% visible, high-contrast, and matches LabMesh dark theme
+   ========================================================================== */
+main {
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: 1.5rem 1.25rem !important;
+}
+
+main > header {
+  display: flex !important;
+  gap: 14px !important;
+  align-items: center !important;
+  border-bottom: 1px solid var(--lm-card-border) !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 1.25rem !important;
+}
+
+main > header h1 {
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.02em !important;
+}
+
+main > header > span:last-child {
+  margin-left: auto !important;
+  color: var(--lm-text-muted) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+}
+
+main > header .mark {
+  display: grid !important;
+  place-items: center !important;
+  background: var(--lm-primary) !important;
+  color: white !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 8px !important;
+  font-size: 22px !important;
+}
+
+/* Gemini Room Guide Advisor Section */
+#advisor {
+  background: var(--lm-card-bg) !important;
+  border: 1px solid var(--lm-card-border) !important;
+  border-radius: 10px !important;
+  padding: 1.5rem !important;
+  margin-top: 1.5rem !important;
+  color: var(--lm-text-main) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+#advisor h2 {
+  color: #93c5fd !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+#advisor h2::before {
+  content: "✨";
+  font-size: 1.15rem;
+}
+
+#advisor p {
+  color: var(--lm-text-muted) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 1.1rem !important;
+}
+
+#advisor label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  color: var(--lm-text-main) !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  margin-right: 1.25rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+#advisor select {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid var(--lm-card-border) !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 0.85rem !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#advisor select:focus {
+  border-color: var(--lm-primary) !important;
+  box-shadow: 0 0 0 3px var(--lm-primary-focus) !important;
+}
+
+#advisor select option {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+
+#advisor button#ask {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  background: var(--lm-primary) !important;
+  color: #ffffff !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  padding: 0.55rem 1.2rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, transform 0.05s ease !important;
+  vertical-align: middle !important;
+}
+
+#advisor button#ask:hover:not(:disabled) {
+  background: var(--lm-primary-hover) !important;
+}
+
+#advisor button#ask:active:not(:disabled) {
+  transform: translateY(1px) !important;
+}
+
+#advisor button#ask:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+#advisor #response {
+  margin-top: 1.25rem !important;
+  padding: 0.85rem 1.15rem !important;
+  background: #0b1120 !important;
+  border: 1px solid var(--lm-card-border) !important;
+  border-left: 4px solid var(--lm-primary) !important;
+  border-radius: 6px !important;
+  color: #f1f5f9 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  white-space: pre-wrap !important;
+}
+
+#advisor #response:empty {
+  display: none !important;
+}
+
