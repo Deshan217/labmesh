@@ -125,25 +125,6 @@ The client transmits an anonymous, privacy-safe state snapshot:
 Laptop B queries Gemini via Google's `generateContent` API using server-side credentials. File contents, filenames, peer names, room codes, and WebRTC SDP/ICE data **never** leave the local network. The generated response gives the instructor a concise, grounded explanation of current swarm health and the recommended next step.
 
 ---
-
-## Two-Minute Live Demo Script & One-Minute Q&A
-
-### Pitch & Demonstration (2 Minutes)
-- **0:00 - 0:30 (Problem)**: "In Sri Lankan university and community computer labs, downloading a 50MB starter kit across 30 laptops at the same time completely saturates the school's internet. The first 45 minutes of a workshop are often lost to downloading files."
-- **0:30 - 1:00 (Setup & Seed)**: "With LabMesh, the instructor on Laptop A selects the starter kit. Laptops B and C join the room over the classroom Wi-Fi. Over WebRTC data channels, Laptop A seeds complementary chunk sets to B and C without touching the external internet."
-- **1:00 - 1:30 (Failover Trigger)**: "Notice the strip: B has even chunks, C has odd chunks. Neither has the full file yet. But our readiness indicator confirms: 'Ready to disconnect the source'. Let's ask a judge to close Laptop A's tab right now."
-- **1:30 - 2:00 (P2P Recovery & Verify)**: "Laptop A is offline. The coordinator on B remains up. B and C immediately recognize each other's inventories and swap missing pieces peer-to-peer. Both reach Verified! We save the files and run `Get-FileHash`: exact SHA-256 match `fbbab...`. Finally, click the Gemini Room Guide to get a grounded explanation in Sinhala."
-
-### Q&A Defense (1 Minute)
-- **Q: Does this work without internet?**
-  *A: The entire file transfer and WebRTC mesh operate purely offline on the venue LAN or mobile hotspot. Only the optional Gemini Room Guide uses the coordinator's internet connection.*
-- **Q: What if the local Wi-Fi blocks client-to-client connections?**
-  *A: A single phone personal hotspot or travel router circumvents client isolation policies without requiring external TURN servers.*
-- **Q: Why run the coordinator on B instead of A?**
-  *A: Running the coordinator on a receiving laptop or non-instructor device ensures the signaling and presence state remain intact when the instructor disconnects.*
-
----
-
 ## Project Boundaries & Limitations
 
 - **Room Capacity**: Judged MVP supports 3 simultaneous active participants (1 creator, 2 joiners).
