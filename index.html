@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LabMesh · Local P2P File Sharing with Gemini Guide</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.2);
+      --accent: #38bdf8;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0 1rem 3rem;
+    }
+
+    header {
+      max-width: 1040px;
+      margin: 2rem auto 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .brand h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
+    .brand p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .nav-links {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #059669; }
+    .btn-outline { background: #1e293b; color: var(--text); border-color: #334155; }
+    .btn-outline:hover { background: #334155; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .hero h2 { font-size: 2.1rem; font-weight: 800; margin-bottom: 0.75rem; line-height: 1.25; }
+    .hero p { max-width: 720px; margin: 0 auto; color: var(--text-muted); font-size: 1.05rem; }
+
+    /* Interactive Simulator */
+    .sim-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .sim-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sim-header h3 { font-size: 1.3rem; display: flex; align-items: center; gap: 0.5rem; }
+    .sim-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .ready-banner {
+      display: none;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1.5rem;
+      color: #34d399;
+      font-weight: 700;
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .peers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .peer-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 1.25rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .peer-card.active { border-color: #334155; }
+    .peer-card.offline { opacity: 0.55; border-color: #ef4444; }
+
+    .peer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .peer-name { font-weight: 700; font-size: 1.05rem; }
+    .peer-role { font-size: 0.75rem; color: var(--text-muted); }
+
+    .status-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .status-online { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-offline { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    .chunk-strip-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chunk-strip {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 3px;
+      background: #090d16;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid #1e293b;
+    }
+
+    .chunk-cell {
+      height: 18px;
+      border-radius: 2px;
+      background: #1e293b;
+      transition: background 0.25s ease;
+    }
+
+    .chunk-cell.full { background: var(--primary); box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
+
+    .hash-display {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .hash-val { color: var(--accent); word-break: break-all; }
+
+    /* Gemini Advisor Section */
+    .advisor-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+    }
+
+    .advisor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .advisor-header h3 { font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: #a78bfa; }
+
+    .advisor-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1.25rem;
+      font-size: 1rem;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      color: #e2e8f0;
+    }
+
+    /* Architecture grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .feat-card h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .feat-card p { font-size: 0.9rem; color: var(--text-muted); }
+
+    footer {
+      max-width: 1040px;
+      margin: 2rem auto 0;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">↔</div>
+      <div>
+        <h1>LabMesh</h1>
+        <p>Local-First P2P File Distribution & Gemini Room Guide</p>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="https://github.com/Deshan217/labmesh" target="_blank" class="btn btn-outline">GitHub Repository</a>
+      <a href="tests/ui/index.html" class="btn btn-outline">UI Dev Harness</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="badge">JIAT Hack Days Gampaha 2026</span>
+      <h2>Zero-Internet Classroom File Sharing</h2>
+      <p>
+        In community workshops sharing a single congested Wi-Fi connection, dozens of laptops downloading starter kits stall the room. 
+        <strong>LabMesh</strong> streams verified chunks laptop-to-laptop over WebRTC Data Channels. Even when the instructor disconnects, students automatically swap missing chunks peer-to-peer!
+      </p>
+    </section>
+
+    <!-- LIVE DEMO SIMULATION SECTION -->
+    <section class="sim-card">
+      <div class="sim-header">
+        <div>
+          <h3>🎮 Interactive P2P Failover Simulator</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted);">Experience the headline acceptance test live in your browser.</p>
+        </div>
+        <div class="sim-controls">
+          <button id="btn-seed" class="btn btn-primary" onclick="startStagedTransfer()">1. Start Staged Transfer</button>
+          <button id="btn-disconnect" class="btn btn-danger" onclick="disconnectHost()" disabled>2. Disconnect Host A</button>
+          <button id="btn-reset" class="btn btn-outline" onclick="resetSim()">Reset</button>
+        </div>
+      </div>
+
+      <div id="ready-banner" class="ready-banner">
+        ✓ Ready to disconnect the source! Receivers B & C jointly hold 100% of the file chunks.
+      </div>
+
+      <div class="peers-grid">
+        <!-- Peer A -->
+        <div id="card-a" class="peer-card active">
+          <div class="peer-top">
+            <div>
+              <div class="peer-name">Instructor A</div>
+              <div class="peer-role">Source Host</div>
+            </div>
+            <span id="badge-a" class="status-pill status-online">Online</span>
+          </div>
+          <div class="chunk-strip-label">
+            <span>File Chunks (16)</span>
+            <span id="count-a">16/16</span>
+          </div>
+          <div id="strip-a" class="chunk-strip"></div>
+        </div>
+
+        <!-- Peer B -->
+        <div id="card-b" class="peer-card active">
+          <div class="peer-top">
+            <div>
+              <div class="peer-name">Student B</div>
+              <div class="peer-role">Receiver 1</div>
+            </div>
+            <span class="status-pill status-online">Online</span>
+          </div>
+          <div class="chunk-strip-label">
+            <span>Verified Chunks</span>
+            <span id="count-b">0/16</span>
+          </div>
+          <div id="strip-b" class="chunk-strip"></div>
+        </div>
+
+        <!-- Peer C -->
+        <div id="card-c" class="peer-card active">
+          <div class="peer-top">
+            <div>
+              <div class="peer-name">Student C</div>
+              <div class="peer-role">Receiver 2</div>
+            </div>
+            <span class="status-pill status-online">Online</span>
+          </div>
+          <div class="chunk-strip-label">
+            <span>Verified Chunks</span>
+            <span id="count-c">0/16</span>
+          </div>
+          <div id="strip-c" class="chunk-strip"></div>
+        </div>
+      </div>
+
+      <div class="hash-display">
+        <span>Deterministic SHA-256 Digest:</span>
+        <span id="hash-val" class="hash-val">fbbab289f7f94b25736c58be46a994c441fd02552cc6022352e3d86d2fab7c83</span>
+      </div>
+    </section>
+
+    <!-- GEMINI ROOM GUIDE SECTION -->
+    <section class="advisor-card">
+      <div class="advisor-header">
+        <h3>✨ Gemini Room Guide (Simulated Live Analysis)</h3>
+        <div>
+          <label style="font-size:0.85rem; color:var(--text-muted); margin-right:0.5rem;">Language:
+            <select id="guide-lang" style="background:#1e293b; color:#fff; padding:0.3rem 0.6rem; border:1px solid #475569; border-radius:6px;">
+              <option value="si">Sinhala (සිංහල)</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <button class="btn btn-outline" style="border-color:#a78bfa; color:#c4b5fd;" onclick="askGemini()">Explain Current Snapshot</button>
+        </div>
+      </div>
+      <div id="advisor-output" class="advisor-box">
+        කාමරය සූදානම්. ගොනුව බෙදාහැරීම ආරම්භ කිරීමට "1. Start Staged Transfer" ක්ලික් කරන්න.
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE & SPECS -->
+    <section class="features-grid">
+      <div class="feat-card">
+        <h4>⚡ WebRTC Data Channels</h4>
+        <p>Direct peer-to-peer <code>RTCDataChannel</code> with ordered, reliable ArrayBuffer transport. Employs backpressure handling to eliminate congestion.</p>
+      </div>
+      <div class="feat-card">
+        <h4>🛡️ True Decentralized Failover</h4>
+        <p>Seeds even/odd complementary chunks to receivers. When the host leaves, peers automatically swap missing chunks and verify the whole file.</p>
+      </div>
+      <div class="feat-card">
+        <h4>🤖 Google Gemini 3.8 Flash</h4>
+        <p>Grounded live room explanations in Sinhala or English, turning raw WebRTC counts and chunk vectors into plain-language instructor insights.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>LabMesh · Built for JIAT Hack Days Gampaha 2026 · MIT Licensed · Copyright &copy; 2026 Deshan Nethmina</p>
+  </footer>
+
+  <script>
+    const CHUNK_COUNT = 16;
+    let stage = 0; // 0: idle, 1: seeded, 2: disconnected & complete
+
+    function initStrips() {
+      ['strip-a', 'strip-b', 'strip-c'].forEach(id => {
+        const el = document.getElementById(id);
+        el.innerHTML = '';
+        for (let i = 0; i < CHUNK_COUNT; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'chunk-cell';
+          cell.id = `${id}-${i}`;
+          el.appendChild(cell);
+        }
+      });
+      for (let i = 0; i < CHUNK_COUNT; i++) {
+        document.getElementById(`strip-a-${i}`).classList.add('full');
+      }
+    }
+
+    function startStagedTransfer() {
+      stage = 1;
+      document.getElementById('btn-seed').disabled = true;
+
+      // Seed even to B, odd to C
+      for (let i = 0; i < CHUNK_COUNT; i++) {
+        if (i % 2 === 0) {
+          document.getElementById(`strip-b-${i}`).classList.add('full');
+        } else {
+          document.getElementById(`strip-c-${i}`).classList.add('full');
+        }
+      }
+
+      document.getElementById('count-b').textContent = '8/16';
+      document.getElementById('count-c').textContent = '8/16';
+      document.getElementById('ready-banner').style.display = 'block';
+      document.getElementById('btn-disconnect').disabled = false;
+
+      updateGuide(
+        "ලබන්නන් B සහ C එක්ව සියලුම chunks රඳවාගෙන ඇත. ඔබට දැන් Instructor A ගේ සම්බන්ධතාවය විසන්ධි කළ හැක.",
+        "Receivers B and C jointly hold all 16 chunks. It is now safe to disconnect Instructor A."
+      );
+    }
+
+    function disconnectHost() {
+      if (stage !== 1) return;
+      stage = 2;
+      document.getElementById('btn-disconnect').disabled = true;
+
+      // Disconnect A
+      document.getElementById('card-a').classList.remove('active');
+      document.getElementById('card-a').classList.add('offline');
+      document.getElementById('badge-a').className = 'status-pill status-offline';
+      document.getElementById('badge-a').textContent = 'Offline';
+
+      // Automatic P2P failover: B and C swap missing chunks
+      setTimeout(() => {
+        for (let i = 0; i < CHUNK_COUNT; i++) {
+          document.getElementById(`strip-b-${i}`).classList.add('full');
+          document.getElementById(`strip-c-${i}`).classList.add('full');
+        }
+        document.getElementById('count-b').textContent = '16/16 (Verified)';
+        document.getElementById('count-c').textContent = '16/16 (Verified)';
+        document.getElementById('ready-banner').textContent = '🎉 Transfer Complete! Both B and C successfully verified the whole-file SHA-256 hash.';
+
+        updateGuide(
+          "Instructor A විසන්ධි වී ඇත. B සහ C එකිනෙකාගෙන් chunks හුවමාරු කරගෙන සම්පූර්ණ SHA-256 තහවුරු කිරීම සාර්ථකව අවසන් කළහ.",
+          "Instructor A disconnected. B and C recovered missing pieces peer-to-peer and reached verified whole-file SHA-256 completion."
+        );
+      }, 700);
+    }
+
+    function resetSim() {
+      stage = 0;
+      document.getElementById('btn-seed').disabled = false;
+      document.getElementById('btn-disconnect').disabled = true;
+      document.getElementById('ready-banner').style.display = 'none';
+      document.getElementById('ready-banner').textContent = '✓ Ready to disconnect the source! Receivers B & C jointly hold 100% of the file chunks.';
+      document.getElementById('card-a').className = 'peer-card active';
+      document.getElementById('badge-a').className = 'status-pill status-online';
+      document.getElementById('badge-a').textContent = 'Online';
+      document.getElementById('count-b').textContent = '0/16';
+      document.getElementById('count-c').textContent = '0/16';
+      initStrips();
+      updateGuide(
+        "කාමරය සූදානම්. ගොනුව බෙදාහැරීම ආරම්භ කිරීමට '1. Start Staged Transfer' ක්ලික් කරන්න.",
+        "Room is idle. Click '1. Start Staged Transfer' to seed the workshop file."
+      );
+    }
+
+    function updateGuide(si, en) {
+      const lang = document.getElementById('guide-lang').value;
+      document.getElementById('advisor-output').textContent = lang === 'si' ? si : en;
+    }
+
+    function askGemini() {
+      if (stage === 0) {
+        updateGuide(
+          "කාමරය සක්‍රියයි. නමුත් තවමත් ගොනුවක් තෝරාගෙන නැත. කරුණාකර transfer එක ආරම්භ කරන්න.",
+          "Session is active with 3 peers, waiting for file selection."
+        );
+      } else if (stage === 1) {
+        updateGuide(
+          "B ලඟ even chunks ද, C ලඟ odd chunks ද ඇත. ලබන්නන් දෙදෙනා එක්ව 100% coverage සම්පූර්ණ කර ඇත. Ready to disconnect.",
+          "Receivers jointly hold all 16 chunks with complementary inventories. Ready to disconnect the source."
+        );
+      } else if (stage === 2) {
+        updateGuide(
+          "සම්පූර්ණ file verification සාර්ථකයි. ගොනුවේ hash එක fbbab289... සමඟ 100% ගැලපේ. Save verified file ක්ලික් කරන්න.",
+          "Whole-file SHA-256 integrity verified on both receivers. Safe to download and save verified file."
+        );
+      }
+    }
+
+    document.getElementById('guide-lang').addEventListener('change', askGemini);
+    window.onload = initStrips;
+  </script>
+</body>
+</html>
