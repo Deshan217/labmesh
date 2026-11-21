@@ -1097,3 +1097,89 @@ body {
     min-width: 4px;
   }
 }
+
+
+/* ==========================================================================
+   Gemini Room Guide Advisor Styles (High-contrast Dark Theme)
+   ========================================================================== */
+#advisor {
+  background: var(--lm-card-bg, #131c31) !important;
+  color: var(--lm-text-main, #f8fafc) !important;
+  border: 1px solid var(--lm-card-border, #243452) !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  margin-top: 1.5rem !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+#advisor h2 {
+  color: #a78bfa !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+#advisor p {
+  color: var(--lm-text-muted, #94a3b8) !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 1rem !important;
+}
+
+#advisor label {
+  color: #cbd5e1 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  margin-right: 1rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+#advisor select {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  border-radius: 6px !important;
+  padding: 0.45rem 0.85rem !important;
+  font-size: 0.9rem !important;
+}
+
+#advisor select:focus {
+  outline: 2px solid #a78bfa !important;
+}
+
+#advisor button#ask {
+  background: var(--lm-success, #10b981) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 1.2rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+}
+
+#advisor button#ask:hover {
+  background: #059669 !important;
+}
+
+#advisor button#ask:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+#response {
+  margin-top: 1.25rem !important;
+  padding: 1rem 1.25rem !important;
+  background: #090d16 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  color: #f8fafc !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  white-space: pre-wrap !important;
+  min-height: 48px !important;
+}
